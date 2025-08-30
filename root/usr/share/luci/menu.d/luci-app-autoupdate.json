@@ -1,0 +1,10 @@
+{
+    "admin/system/autoupdate": {
+        "title": "固件更新",
+        "order": 90,
+        "action": {
+            "type": "view",
+            "path": "autoupdate/index"
+        }
+    }
+}

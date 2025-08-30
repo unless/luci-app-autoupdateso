@@ -19,11 +19,9 @@ package() {
     mkdir -p "$pkgdir"
     cp -r "$srcdir"/../root/* "$pkgdir"/
     
-    # LuCI files - 正确设置ucode应用路径
+    # LuCI files - 为新版 LuCI 设置正确的目录结构
     mkdir -p "$pkgdir"/usr/share/rpcd/acl.d/
-    mkdir -p "$pkgdir"/usr/share/luci/menu.d/
-    mkdir -p "$pkgdir"/usr/share/luci/controller/
-    mkdir -p "$pkgdir"/usr/share/luci/view/
+    mkdir -p "$pkgdir"/www/luci-static/resources/view/autoupdate/
     
     # 创建ACL文件
     cat > "$pkgdir"/usr/share/rpcd/acl.d/luci-app-autoupdate.json <<EOF
@@ -46,11 +44,18 @@ package() {
 }
 EOF
     
-    # 复制视图和控制器文件
-    cp -r "$srcdir"/../luasrc/view/* "$pkgdir"/usr/share/luci/view/
-    cp -r "$srcdir"/../luasrc/controller/* "$pkgdir"/usr/share/luci/controller/
+    # 复制新的 JavaScript 视图文件
+    if [ -d "$srcdir"/../htdocs/luci-static/resources/view/autoupdate ]; then
+        cp -r "$srcdir"/../htdocs/luci-static/resources/view/autoupdate/* "$pkgdir"/www/luci-static/resources/view/autoupdate/
+    fi
     
-    # 创建菜单配置
+    # 设置正确的权限
+    chmod 755 "$pkgdir"/usr/libexec/rpcd/autoupdate.uc
+    chmod 644 "$pkgdir"/etc/config/autoupdate
+    chmod 644 "$pkgdir"/usr/share/rpcd/acl.d/luci-app-autoupdate.json
+    
+    # 创建控制器 JSON 文件 (新版 LuCI 菜单方式)
+    mkdir -p "$pkgdir"/usr/share/luci/menu.d/
     cat > "$pkgdir"/usr/share/luci/menu.d/luci-app-autoupdate.json <<EOF
 {
     "admin/system/autoupdate": {
@@ -63,11 +68,6 @@ EOF
     }
 }
 EOF
-    
-    # 设置正确的权限
-    chmod 755 "$pkgdir"/usr/libexec/rpcd/autoupdate.uc
-    chmod 644 "$pkgdir"/etc/config/autoupdate
-    chmod 644 "$pkgdir"/usr/share/rpcd/acl.d/luci-app-autoupdate.json
     
     # 创建安装后脚本
     mkdir -p "$pkgdir"/etc/uci-defaults
