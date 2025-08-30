@@ -61,17 +61,27 @@ jobs:
             ls -la /workspace/packages/
 
       - name: Generate Tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # 设置 git 配置权限
+          sudo chown -R $USER:$USER .git/
+          
           if [ ! -d "packages" ] || [ -z "$(ls -A packages/*.apk 2>/dev/null)" ]; then
             echo "Error: No APK files found in packages directory"
             exit 1
           fi
+          
           timestamp=$(date +%Y%m%d%H%M%S)
           echo "BUILD_DATE=$timestamp" >> $GITHUB_ENV
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          
+          # 配置 git
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          
+          # 创建和推送标签
           git tag "v$timestamp"
-          git push origin "v$timestamp"
+          git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "v$timestamp"
 
       - name: Create Release
         if: success()
