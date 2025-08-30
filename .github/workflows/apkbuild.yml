@@ -28,15 +28,14 @@ jobs:
             su builder -c "
               cd /workspace
               export PACKAGER='github@actions'
-              export PACKAGER_PRIVKEY=/workspace/abuild.key
               abuild-keygen -a -n -i
               abuild -r
             "
             # 查找所有生成的 .apk 文件并复制到 /workspace
-            find /home/builder/packages -name '*.apk' -exec cp {} /workspace/ \;
+            find /home/builder/packages -name '*.apk' -exec cp {} /workspace/ \; || true
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: apk-packages
-          path: /Volumes/HDD/aicode/luci-app-autoupdate/*.apk
+          path: ./*.apk
