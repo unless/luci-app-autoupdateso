@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,6 +16,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Build APK package in Alpine
         uses: addnab/docker-run-action@v3
@@ -20,24 +25,31 @@ jobs:
           image: alpine:edge
           options: -v ${{ github.workspace }}:/workspace
           run: |
+            # 系统配置
             apk update
-            apk add alpine-sdk build-base fakeroot sudo
+            apk add alpine-sdk build-base fakeroot sudo git
+            
+            # 用户配置
             adduser -D builder
             echo "builder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
             addgroup builder abuild
+            
+            # 目录权限
             mkdir -p /var/cache/distfiles
             chown builder:abuild /var/cache/distfiles
             chown -R builder:abuild /workspace
             
+            # 构建过程
             su builder -c "
               cd /workspace
+              git config --global --unset http.https://github.com/.extraheader || true
               export PACKAGER='GitHub Actions <github@actions>'
               abuild-keygen -a -i -n
               abuild checksum
               abuild -r
             "
             
-            # 复制生成的 apk 到工作目录
+            # 复制构建结果
             find /home/builder/packages -name '*.apk' -exec cp {} /workspace/ \;
 
       - name: Upload APK artifact
