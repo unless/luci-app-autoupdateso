@@ -19,7 +19,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          persist-credentials: false
+          persist-credentials: true
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build APK package in Alpine
         uses: addnab/docker-run-action@v3
@@ -62,9 +63,11 @@ jobs:
 
       - name: Generate Tag
         run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
           echo "BUILD_DATE=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
-          git tag v$BUILD_DATE
-          git push origin v$BUILD_DATE
+          git tag v${{ env.BUILD_DATE }}
+          git push origin v${{ env.BUILD_DATE }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
