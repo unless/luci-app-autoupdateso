@@ -26,8 +26,9 @@ jobs:
           options: -v ${{ github.workspace }}:/workspace
           run: |
             # 系统配置
+            echo "https://downloads.openwrt.org/releases/packages/x86_64/packages" >> /etc/apk/repositories
             apk update
-            apk add alpine-sdk build-base fakeroot sudo git
+            apk add alpine-sdk build-base fakeroot sudo git luci-base rpcd
             
             # 用户配置
             adduser -D builder
