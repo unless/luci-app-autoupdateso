@@ -32,11 +32,11 @@ jobs:
               abuild-keygen -a -n -i
               abuild -r
             "
-            # 查找所有生成的 .apk 文件
-            find /workspace -name '*.apk' -exec cp {} /workspace/ \;
+            # 查找所有生成的 .apk 文件并复制到 /workspace
+            find /home/builder/packages -name '*.apk' -exec cp {} /workspace/ \;
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: apk-packages
-          path: ./*.apk
+          path: /Volumes/HDD/aicode/luci-app-autoupdate/*.apk
