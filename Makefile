@@ -4,7 +4,7 @@ PKG_NAME:=luci-app-autoupdate
 PKG_VERSION:=1.0
 PKG_RELEASE:=1
 
-PKG_MAINTAINER:=you <you@example.com>
+PKG_MAINTAINER:=soapmans@icloud.com
 
 include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/luci/luci.mk
@@ -39,8 +39,8 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller
 	$(INSTALL_DATA) ./luasrc/controller/autoupdate.uc $(1)/usr/lib/lua/luci/controller/autoupdate.uc
 
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/view/autoupdate
-	$(INSTALL_DATA) ./luasrc/view/autoupdate/index.ut $(1)/usr/lib/lua/luci/view/autoupdate/index.ut
+	$(INSTALL_DIR) $(1)/usr/share/ucode/luci/view/autoupdate
+	$(INSTALL_DATA) ./luasrc/view/autoupdate/index.ut $(1)/usr/share/ucode/luci/view/autoupdate/index.ut
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
