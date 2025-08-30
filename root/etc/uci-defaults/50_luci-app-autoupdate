@@ -1,41 +1,46 @@
 #!/bin/sh
 
-# 确保 RPC 服务有正确权限
+# 确保 RPC 脚本有执行权限
 chmod 755 /usr/libexec/rpcd/autoupdate.uc
 
-# 检查文件是否存在且有执行权限
-if [ -x /usr/libexec/rpcd/autoupdate.uc ]; then
-    echo "RPC script exists and is executable"
-else
-    echo "Setting executable permissions on RPC script"
-    chmod 755 /usr/libexec/rpcd/autoupdate.uc
-fi
+# 注册修复脚本
+chmod 755 /usr/bin/autoupdate-fix.sh
 
-# 添加到启动队列，确保重启后仍然可用
-if grep -q "/usr/libexec/rpcd/autoupdate.uc" /etc/rc.local; then
-    echo "RPC script already in rc.local"
-else
-    sed -i '/exit 0/i chmod 755 /usr/libexec/rpcd/autoupdate.uc' /etc/rc.local
-fi
-
-# 停止并重启 rpcd 服务以确保加载新的 RPC 方法
-/etc/init.d/rpcd stop
-sleep 1
-/etc/init.d/rpcd start
-
-# 列出注册的 ubus 对象，用于验证
-ubus list | grep autoupdate
-
-# 添加防火墙允许规则（如需访问外部下载）
-uci -q batch <<-EOF >/dev/null
+# 添加防火墙允许规则
+uci -q batch <<-END >/dev/null
 	set firewall.autoupdate=rule
 	set firewall.autoupdate.name='Allow-Autoupdate'
 	set firewall.autoupdate.src='wan'
 	set firewall.autoupdate.target='ACCEPT'
 	set firewall.autoupdate.enabled='1'
 	commit firewall
-EOF
+END
 
-# 清除 LuCI 缓存
+# 重启rpcd服务以加载新的RPC方法
+/etc/init.d/rpcd stop
+sleep 1
+/etc/init.d/rpcd start
+
+# 如果服务没有自动注册，尝试手动注册
+if ! ubus list | grep -q autoupdate; then
+    /usr/bin/autoupdate-fix.sh
+fi
+
+# 移除LuCI缓存
+rm -f /tmp/luci-indexcache
+exit 0
+	set firewall.autoupdate.name='Allow-Autoupdate'
+	set firewall.autoupdate.src='wan'
+	set firewall.autoupdate.target='ACCEPT'
+	set firewall.autoupdate.enabled='1'
+	commit firewall
+END
+
+# 立即重启rpcd服务
+/etc/init.d/rpcd stop
+sleep 1
+/etc/init.d/rpcd start
+
+# 清除LuCI缓存
 rm -f /tmp/luci-indexcache
 exit 0

@@ -1,39 +1,57 @@
 #!/usr/bin/ucode
 'use strict';
-'require fs';
-'require process';
-'require uci';
 
-let cfg = uci.load("autoupdate");
+import { access, error, lstat, popen, readfile, writefile } from 'fs';
 
-// 确保正确导出方法，格式必须严格按照 rpcd 要求
-return {
-    seturl: {
-        args: { url: "string" },
-        call: function(args) {
-            uci.set("autoupdate", "main", "url", args.url);
-            uci.commit("autoupdate");
-            return { success: true };
-        }
-    },
-    download: {
-        call: function() {
-            let url = uci.get("autoupdate", "main", "url");
-            if (!url || url == "")
-                return { success: false, error: "未配置固件地址" };
-                
-            console.log("开始下载固件: " + url);
-            let code = process.run("/usr/bin/wget", [ "-O", "/tmp/firmware.bin", url ]);
-            console.log("下载完成，状态码: " + code);
-            return { success: (code == 0) };
-        }
-    },
-    upgrade: {
-        call: function() {
-            // 异步执行升级
-            console.log("开始升级系统");
-            process.fork("/sbin/sysupgrade", [ "-c", "/tmp/firmware.bin" ]);
-            return { success: true };
-        }
-    }
+/* Ranged from ucode/luci */
+function shellquote(s) {
+	return "'${replace(s, "'", "'\\''")}'";
+}
+
+const HP_DIR = '/etc/homeproxy';
+const RUN_DIR = '/var/run/homeproxy';
+
+const methods = {
+	seturl: {
+		args: { type: 'type' },
+		call: function(req) {
+			if (index(['url'], req.args?.type) === -1)
+				return { error: 'illegal type' };
+
+			const uci = require('uci');
+			uci.load('autoupdate');
+			uci.set('autoupdate', 'main', 'url', req.args?.content);
+			uci.commit('autoupdate');
+				
+			return { result: true };
+		}
+	},
+	
+	download: {
+		call: function() {
+			const uci = require('uci');
+			const process = require('process');
+			
+			uci.load('autoupdate');
+			let url = uci.get('autoupdate', 'main', 'url');
+			if (!url || url == '')
+				return { result: false, error: '未配置固件地址' };
+				
+			console.log('开始下载固件: ' + url);
+			let code = process.run('/usr/bin/wget', [ '-O', '/tmp/firmware.bin', url ]);
+			console.log('下载完成，状态码: ' + code);
+			return { result: (code == 0) };
+		}
+	},
+	
+	upgrade: {
+		call: function() {
+			const process = require('process');
+			
+			// 异步执行升级
+			console.log('开始升级系统');
+			process.fork('/sbin/sysupgrade', [ '-c', '/tmp/firmware.bin' ]);
+			return { result: true };
+		}
+	}
 };
