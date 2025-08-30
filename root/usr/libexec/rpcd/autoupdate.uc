@@ -8,9 +8,6 @@ function shellquote(s) {
 	return "'${replace(s, "'", "'\\''")}'";
 }
 
-const HP_DIR = '/etc/homeproxy';
-const RUN_DIR = '/var/run/homeproxy';
-
 const methods = {
 	seturl: {
 		args: { type: 'type' },
@@ -55,3 +52,5 @@ const methods = {
 		}
 	}
 };
+
+export { methods };

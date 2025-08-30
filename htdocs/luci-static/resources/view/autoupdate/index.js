@@ -5,11 +5,11 @@
 'require uci';
 'require rpc';
 
-// 定义 RPC 调用方法
+// 定义 RPC 调用方法，适配新的接口格式
 var callSetUrl = rpc.declare({
     object: 'autoupdate',
     method: 'seturl',
-    params: ['type', 'content'],
+    params: { type: 'url', content: 'String' },
     expect: { result: true }
 });
 
@@ -43,6 +43,11 @@ return view.extend({
 
         o = s.option(form.Value, 'url', _('固件下载地址'));
         o.rmempty = false;
+        
+        // 保存按钮点击事件
+        o.write = function(section_id, value) {
+            return callSetUrl({ type: 'url', content: value });
+        };
 
         s = m.section(form.TypedSection, 'settings');
         s.anonymous = true;
