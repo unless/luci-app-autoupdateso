@@ -1,4 +1,4 @@
-# Maintainer: soapmans@icloud.com
+# Maintainer: Soapman <soapmans@icloud.com>
 pkgname=luci-app-autoupdate
 pkgver=2.0
 pkgrel=2
