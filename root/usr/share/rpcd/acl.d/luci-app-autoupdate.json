@@ -3,13 +3,14 @@
         "description": "Grant access to autoupdate procedures",
         "read": {
             "ubus": {
-                "autoupdate": ["seturl", "download", "upgrade"]
+                "service": [ "list" ],
+                "luci.autoupdate": ["*"]
             },
             "uci": ["autoupdate"]
         },
         "write": {
             "ubus": {
-                "autoupdate": ["seturl", "download", "upgrade"]
+                "luci.autoupdate": ["seturl", "download", "upgrade"]
             },
             "uci": ["autoupdate"]
         }

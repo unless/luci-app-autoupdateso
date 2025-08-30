@@ -89,11 +89,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ env.BUILD_DATE }}
+          tag_name: v$(date +%Y%m%d%H%M%S)
           files: packages/*.apk
-          name: Release v${{ env.BUILD_DATE }}
+          name: Release v$(date +%Y%m%d%H%M%S)
           draft: false
           prerelease: false
           body: |
-            Alpine Package Build at v${{ env.BUILD_DATE }}
+            Alpine Package Build at v$(date +%Y%m%d%H%M%S)
             Automated build from GitHub Actions
