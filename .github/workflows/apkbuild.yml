@@ -25,17 +25,21 @@ jobs:
           image: alpine:edge
           options: -v ${{ github.workspace }}:/workspace
           run: |
-            # 系统配置
-            echo "https://downloads.openwrt.org/releases/packages/x86_64/packages" >> /etc/apk/repositories
-            apk update
-            apk add alpine-sdk build-base fakeroot sudo git luci-base rpcd
+            # 添加必要的仓库
+            echo "https://dl-cdn.alpinelinux.org/alpine/edge/main" > /etc/apk/repositories
+            echo "https://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
+            echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
             
-            # 用户配置
+            # 更新系统并安装基础包
+            apk update
+            apk add alpine-sdk build-base fakeroot sudo git
+            
+            # 创建构建用户
             adduser -D builder
             echo "builder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
             addgroup builder abuild
             
-            # 目录权限
+            # 设置构建环境
             mkdir -p /var/cache/distfiles
             chown builder:abuild /var/cache/distfiles
             chown -R builder:abuild /workspace
@@ -51,12 +55,11 @@ jobs:
             "
             
             # 复制构建结果
-            find /home/builder/packages -name '*.apk' -exec cp {} /workspace/ \;
+            mkdir -p /workspace/packages
+            find /home/builder/packages -name '*.apk' -exec cp {} /workspace/packages/ \; || true
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: apk-packages
-          path: |
-            ./*.apk
-            ./src/*.apk
+          path: packages/*.apk
