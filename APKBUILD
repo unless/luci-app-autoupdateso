@@ -6,9 +6,7 @@ pkgdesc="Auto Firmware Update (ucode) for LuCI"
 url="https://github.com/soapmancn/luci-app-autoupdate"
 arch="noarch"
 license="Apache-2.0"
-# 只保留在Alpine中可用的依赖
 depends="wget"
-# 移除不必要的构建依赖
 makedepends=""
 install=""
 subpackages=""
@@ -21,6 +19,7 @@ package() {
     
     # LuCI files - 为新版 LuCI 设置正确的目录结构
     mkdir -p "$pkgdir"/usr/share/rpcd/acl.d/
+    mkdir -p "$pkgdir"/usr/share/luci/menu.d/
     mkdir -p "$pkgdir"/www/luci-static/resources/view/autoupdate/
     
     # 创建ACL文件
@@ -54,8 +53,7 @@ EOF
     chmod 644 "$pkgdir"/etc/config/autoupdate
     chmod 644 "$pkgdir"/usr/share/rpcd/acl.d/luci-app-autoupdate.json
     
-    # 创建控制器 JSON 文件 (新版 LuCI 菜单方式)
-    mkdir -p "$pkgdir"/usr/share/luci/menu.d/
+    # 创建菜单配置 (新版 LuCI 方式)
     cat > "$pkgdir"/usr/share/luci/menu.d/luci-app-autoupdate.json <<EOF
 {
     "admin/system/autoupdate": {

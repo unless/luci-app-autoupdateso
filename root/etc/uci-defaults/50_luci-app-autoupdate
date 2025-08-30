@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# 确保 RPC 服务有正确权限
+chmod 755 /usr/libexec/rpcd/autoupdate.uc
+
+# 重启 rpcd 服务以加载 RPC 方法
+/etc/init.d/rpcd restart
+
+# 添加防火墙允许规则（如需访问外部下载）
+uci -q batch <<-EOF >/dev/null
+	set firewall.autoupdate=rule
+	set firewall.autoupdate.name='Allow-Autoupdate'
+	set firewall.autoupdate.src='wan'
+	set firewall.autoupdate.target='ACCEPT'
+	set firewall.autoupdate.enabled='1'
+	commit firewall
+EOF
+
+# 清除 LuCI 缓存
+rm -f /tmp/luci-indexcache
+exit 0

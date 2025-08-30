@@ -1,0 +1,17 @@
+{
+    "luci-app-autoupdate": {
+        "description": "Grant access to autoupdate procedures",
+        "read": {
+            "ubus": {
+                "autoupdate": ["seturl", "download", "upgrade"]
+            },
+            "uci": ["autoupdate"]
+        },
+        "write": {
+            "ubus": {
+                "autoupdate": ["seturl", "download", "upgrade"]
+            },
+            "uci": ["autoupdate"]
+        }
+    }
+}
