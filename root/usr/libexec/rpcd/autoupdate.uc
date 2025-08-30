@@ -6,7 +6,7 @@
 
 let cfg = uci.load("autoupdate");
 
-// 确保导出对象名称正确
+// 确保正确导出方法，格式必须严格按照 rpcd 要求
 return {
     seturl: {
         args: { url: "string" },
@@ -18,7 +18,7 @@ return {
     },
     download: {
         call: function() {
-            let url = cfg.main.url;
+            let url = uci.get("autoupdate", "main", "url");
             if (!url || url == "")
                 return { success: false, error: "未配置固件地址" };
                 
