@@ -1,0 +1,102 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libncurses5-dev zlib1g-dev \
+            gawk git gettext libssl-dev wget zstd
+
+      - name: Download OpenWrt SDK
+        run: |
+          SDK_URL="https://downloads.openwrt.org/snapshots/targets/qualcommax/ipq807x/openwrt-sdk-qualcommax-ipq807x_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
+          wget $SDK_URL
+          tar --zstd -xf openwrt-sdk-*.tar.zst
+          mv openwrt-sdk-* openwrt-sdk
+
+      - name: Prepare Package Source
+        run: |
+          mkdir -p openwrt-sdk/package/luci-app-autoupdate
+          cp -r htdocs root Makefile openwrt-sdk/package/luci-app-autoupdate/
+
+      - name: Build Package
+        run: |
+          cd openwrt-sdk
+          echo "CONFIG_PACKAGE_luci-app-autoupdate=m" > .config
+          make defconfig
+          make package/luci-app-autoupdate/compile V=s
+
+      - name: Upload Package as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: luci-app-autoupdate-qualcommax-ipq807x
+          path: openwrt-sdk/bin/packages/aarch64_cortex-a53/base/luci-app-autoupdate_*.ipk
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: packages
+
+      - name: Prepare Release Files
+        run: |
+          mkdir -p release
+          find packages -name "*.ipk" -exec cp {} release/ \;
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release/*.ipk
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            ## LuCI App Auto Update - Release ${{ github.ref_name }}
+            
+            ### 安装说明 / Installation
+            
+            下载 `.ipk` 文件，适用于 Qualcomm IPQ8071A 平台设备：
+            - 支持 Qualcommax IPQ807x 系列芯片 (如 IPQ8071A)
+            - ARM64 架构
+            - 基于最新 OpenWrt snapshots 构建
+            
+            安装命令：
+            ```bash
+            opkg install luci-app-autoupdate_*.ipk
+            ```
+            
+            ### 功能特性 / Features
+            - 自动固件更新
+            - 支持多种下载源
+            - 基于 ucode 实现
+            - 现代 LuCI 界面
+            
+            ### 依赖要求 / Dependencies
+            - wget
+            - ucode
+            - ucode-mod-uci
+            - ucode-mod-ubus
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
