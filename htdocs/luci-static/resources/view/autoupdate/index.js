@@ -7,20 +7,20 @@
 
 // 定义 RPC 调用方法，适配新的接口格式
 var callSetUrl = rpc.declare({
-    object: 'autoupdate',
+    object: 'luci.autoupdate',
     method: 'seturl',
     params: { type: 'url', content: 'String' },
     expect: { result: true }
 });
 
 var callDownload = rpc.declare({
-    object: 'autoupdate',
+    object: 'luci.autoupdate',
     method: 'download',
     expect: { result: true }
 });
 
 var callUpgrade = rpc.declare({
-    object: 'autoupdate',
+    object: 'luci.autoupdate',
     method: 'upgrade',
     expect: { result: true }
 });
