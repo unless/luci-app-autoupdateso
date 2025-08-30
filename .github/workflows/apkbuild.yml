@@ -3,11 +3,13 @@ name: APKBUILD Package
 on:
   push:
     branches: [ main ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ main ]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -58,8 +60,12 @@ jobs:
             mkdir -p /workspace/packages
             find /home/builder/packages -name '*.apk' -exec cp {} /workspace/packages/ \; || true
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+      - name: Create Release
+        if: github.event_name == 'push'    # 改为每次推送都创建
+        uses: softprops/action-gh-release@v1
         with:
-          name: apk-packages
-          path: packages/*.apk
+          files: |
+            packages/luci-app-autoupdate*.apk
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
