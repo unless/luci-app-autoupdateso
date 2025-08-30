@@ -1,0 +1,38 @@
+name: APKBUILD Package
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build APK package in Alpine
+        uses: addnab/docker-run-action@v3
+        with:
+          image: alpine:latest
+          options: -v ${{ github.workspace }}:/workspace
+          run: |
+            apk update
+            apk add alpine-sdk fakeroot
+            cd /workspace
+            # 初始化 abuild 环境
+            mkdir -p /workspace/packages
+            export PACKAGER="github@actions"
+            export PACKAGER_PRIVKEY=/workspace/abuild.key
+            abuild-keygen -a -n -i
+            abuild -r
+            cp /workspace/packages/*.apk /workspace/
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-packages
+          path: ./*.apk
