@@ -60,12 +60,18 @@ jobs:
             mkdir -p /workspace/packages
             find /home/builder/packages -name '*.apk' -exec cp {} /workspace/packages/ \; || true
 
+      - name: Generate Tag
+        run: |
+          echo "BUILD_DATE=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+          git tag v$BUILD_DATE
+          git push origin v$BUILD_DATE
+
       - name: Create Release
-        if: github.event_name == 'push'    # 改为每次推送都创建
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: v${{ github.env.BUILD_DATE }}
           files: |
             packages/luci-app-autoupdate*.apk
-          name: Release ${{ github.ref_name }}
+          name: Release v${{ github.env.BUILD_DATE }}
           draft: false
           prerelease: false
