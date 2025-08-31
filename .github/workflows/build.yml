@@ -50,7 +50,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: luci-app-autoupdate-qualcommax-ipq807x
-          path: openwrt-sdk/bin/packages/aarch64_cortex-a53/base/luci-app-autoupdate_*.ipk
+          path: openwrt-sdk/bin/packages/aarch64_cortex-a53/base/luci-app-autoupdate_*.apk
 
   release:
     needs: build
@@ -82,14 +82,14 @@ jobs:
             
             ### 安装说明 / Installation
             
-            下载 `.ipk` 文件，适用于 Qualcomm IPQ8071A 平台设备：
+            下载 `.apk` 文件，适用于 Qualcomm IPQ8071A 平台设备：
             - 支持 Qualcommax IPQ807x 系列芯片 (如 IPQ8071A)
             - ARM64 架构
             - 基于最新 OpenWrt snapshots 构建
             
             安装命令：
             ```bash
-            opkg install luci-app-autoupdate_*.ipk
+            apk add --allow-trusted luci-app-autoupdate_*.ipk
             ```
             
             ### 功能特性 / Features
