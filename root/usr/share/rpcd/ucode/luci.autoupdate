@@ -12,7 +12,7 @@ const methods = {
 
 			const uci = require('uci');
 			uci.load('autoupdate');
-			uci.set('autoupdate', 'settings', 'url', req.args?.content);
+			uci.set('autoupdate', 'main', 'url', req.args?.content);
 			uci.commit('autoupdate');
 				
 			return { result: true };

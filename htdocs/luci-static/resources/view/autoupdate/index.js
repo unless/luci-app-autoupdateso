@@ -50,7 +50,7 @@ return view.extend({
         s = m.section(form.TypedSection, 'settings', _('设置'));
         s.anonymous = true;
         s.render = function(section_id) {
-            var cfg = uci.get('autoupdate', 'settings') || {};
+            var cfg = uci.get('autoupdate', 'main') || {};
             var urlValue = cfg.url || '';
             var input = E('input', {
                 type: 'text',
