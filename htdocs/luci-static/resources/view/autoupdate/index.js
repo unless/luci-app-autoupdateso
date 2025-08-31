@@ -6,20 +6,20 @@
 'require rpc';
 
 // 定义 RPC 调用方法，适配新的接口格式
-var callSetUrl = rpc.declare({
+const callSetUrl = rpc.declare({
     object: 'luci.autoupdate',
     method: 'seturl',
     params: { type: 'url', content: 'String' },
     expect: { result: true }
 });
 
-var callDownload = rpc.declare({
+const callDownload = rpc.declare({
     object: 'luci.autoupdate',
     method: 'download',
     expect: { result: true }
 });
 
-var callUpgrade = rpc.declare({
+const callUpgrade = rpc.declare({
     object: 'luci.autoupdate',
     method: 'upgrade',
     expect: { result: true }
