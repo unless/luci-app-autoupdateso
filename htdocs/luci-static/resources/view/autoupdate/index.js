@@ -43,6 +43,15 @@ return view.extend({
 
         o = s.option(form.Value, 'url', _('固件下载地址'));
         o.rmempty = false;
+        // 让输入框和标题左对齐
+        o.render = function() {
+            var input = form.Value.prototype.render.apply(this, arguments);
+            // 让label和输入框整体左移，与“设置”标题左对齐
+            var wrapper = E('div', {
+                style: 'margin-left:-40px; max-width:500px; display:flex; align-items:center;'
+            }, [input]);
+            return wrapper;
+        };
         // 保存按钮点击事件
         o.write = function(section_id, value) {
             // 先调用RPC写入
