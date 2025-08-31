@@ -45,12 +45,14 @@ return view.extend({
         o.rmempty = false;
         // 让输入框和标题左对齐
         o.render = function() {
-            var input = form.Value.prototype.render.apply(this, arguments);
-            // 让label和输入框整体左移，与“设置”标题左对齐
-            var wrapper = E('div', {
-                style: 'margin-left:-40px; max-width:500px; display:flex; align-items:center;'
-            }, [input]);
-            return wrapper;
+            // 只调整样式，不覆盖原有逻辑，防止返回 Promise
+            o.widget = function(section_id, value) {
+                var widget = form.Value.prototype.widget.apply(this, arguments);
+                var wrapper = E('div', {
+                    style: 'margin-left:-40px; max-width:500px; display:flex; align-items:center;'
+                }, [widget]);
+                return wrapper;
+            };
         };
         // 保存按钮点击事件
         o.write = function(section_id, value) {
