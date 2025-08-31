@@ -40,7 +40,7 @@ return view.extend({
             var style = document.createElement('style');
             style.id = 'autoupdate-style';
             // 让表单项整体左移，与标题左对齐
-            style.innerHTML = '.cbi-section .cbi-value { max-width:500px; margin-left:-60px !important; }';
+            style.innerHTML = '.cbi-section .cbi-value { margin-top:10px; max-width:500px; margin-left:-100px !important; }';
             document.head.appendChild(style);
         }
 
@@ -76,10 +76,21 @@ return view.extend({
                         ]);
                         return callDownload().then(function(res) {
                             ui.hideModal();
-                            if (res && res.result)
-                                ui.addNotification(null, E('p', _('固件下载成功!')), 'success');
-                            else
-                                ui.addNotification(null, E('p', _('固件下载失败: ') + ((res && res.error) || '未知错误')), 'danger');
+                            if (res && res.result) {
+                                var modal = ui.showModal(_('下载成功'), [
+                                    E('p', _('固件下载成功!'))
+                                ]);
+                                setTimeout(function() {
+                                    ui.hideModal();
+                                }, 5000);
+                            } else {
+                                var modal = ui.showModal(_('下载失败'), [
+                                    E('p', _('固件下载失败: ') + ((res && res.error) || '未知错误'))
+                                ]);
+                                setTimeout(function() {
+                                    ui.hideModal();
+                                }, 5000);
+                            }
                         }).catch(function(err) {
                             ui.hideModal();
                             ui.addNotification(null, [
