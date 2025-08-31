@@ -33,6 +33,12 @@ jobs:
           mkdir -p openwrt-sdk/package/luci-app-autoupdate
           cp -r htdocs root Makefile openwrt-sdk/package/luci-app-autoupdate/
 
+      - name: Update Feeds
+        run: |
+          cd openwrt-sdk
+          ./scripts/feeds update luci
+          ./scripts/feeds install luci-base luci-lib-jsonc
+
       - name: Build Package
         run: |
           cd openwrt-sdk
