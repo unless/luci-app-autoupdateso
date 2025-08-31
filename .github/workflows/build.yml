@@ -26,6 +26,8 @@ jobs:
           wget $SDK_URL
           zstd -d openwrt-sdk-*.tar.zst
           tar -xf openwrt-sdk-*.tar
+          rm -rf openwrt-sdk-*.tar
+          rm -rf openwrt-sdk-*.tar.zst
           mv openwrt-sdk-* openwrt-sdk
 
       - name: Prepare Package Source
