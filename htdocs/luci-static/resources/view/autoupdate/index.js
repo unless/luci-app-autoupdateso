@@ -49,19 +49,50 @@ return view.extend({
 
         s = m.section(form.TypedSection, 'settings', _('设置'));
         s.anonymous = true;
-
-        o = s.option(form.Value, 'url', _('固件下载地址'));
-        o.rmempty = false;
-        // 保存按钮点击事件
-        o.write = function(section_id, value) {
-            // 先调用RPC写入
-            return callSetUrl({ type: 'url', content: value }).then(function(res) {
-                // RPC成功后，重新加载UCI配置并刷新表单
-                return uci.load('autoupdate').then(function() {
-                    window.location.reload();
-                });
+        s.render = function(section_id) {
+            var cfg = uci.get('autoupdate', 'settings') || {};
+            var urlValue = cfg.url || '';
+            var input = E('input', {
+                type: 'text',
+                class: 'cbi-input-text',
+                style: 'width:350px;',
+                value: urlValue,
+                id: 'custom-url-input'
             });
+            var saveBtn = E('button', {
+                class: 'btn cbi-button cbi-button-apply',
+                style: 'margin-left:10px;',
+                click: function(ev) {
+                    ev.preventDefault();
+                    var val = document.getElementById('custom-url-input').value;
+                    saveBtn.disabled = true;
+                    callSetUrl({ type: 'url', content: val }).then(function(res) {
+                        if (res && res.result) {
+                            var modal = ui.showModal(_('保存成功'), [E('p', _('地址已保存'))]);
+                            setTimeout(function() { ui.hideModal(); }, 1500);
+                        } else {
+                            var modal = ui.showModal(_('保存失败'), [E('p', _('保存失败: ') + ((res && res.error) || '未知错误'))]);
+                            setTimeout(function() { ui.hideModal(); }, 2000);
+                        }
+                        uci.load('autoupdate').then(function() { window.location.reload(); });
+                    }).catch(function(err) {
+                        var modal = ui.showModal(_('保存失败'), [E('p', _('RPC错误: ') + err.message)]);
+                        setTimeout(function() { ui.hideModal(); }, 2000);
+                        saveBtn.disabled = false;
+                    });
+                }
+            }, _('保存地址'));
+            return E('div', { class: 'cbi-value', style: 'display:flex;align-items:center;' }, [
+                E('label', { style: 'margin-right:10px;font-weight:bold;' }, _('固件下载地址')),
+                input,
+                saveBtn
+            ]);
         };
+    // 隐藏底部默认按钮
+    var styleHideBtn = document.createElement('style');
+    styleHideBtn.id = 'hide-default-save-btn';
+    styleHideBtn.innerHTML = '.cbi-page-actions { display: none !important; }';
+    document.head.appendChild(styleHideBtn);
 
         // 按钮区
         var btnSection = m.section(form.TypedSection, 'dummy');
