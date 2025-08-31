@@ -1,18 +1,13 @@
 #!/usr/bin/ucode
 'use strict';
 
-import { access, error, lstat, popen, readfile, writefile } from 'fs';
-
-/* Ranged from ucode/luci */
-function shellquote(s) {
-	return "'${replace(s, "'", "'\\''")}'";
-}
+import 'fs';
 
 const methods = {
 	seturl: {
 		args: { type: 'type' },
 		call: function(req) {
-			if (index(['url'], req.args?.type) === -1)
+			if (req.args?.type !== 'url')
 				return { error: 'illegal type' };
 
 			const uci = require('uci');

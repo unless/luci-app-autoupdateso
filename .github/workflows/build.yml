@@ -42,7 +42,7 @@ jobs:
       - name: Build Package
         run: |
           cd openwrt-sdk
-          echo "CONFIG_PACKAGE_luci-app-autoupdate=m" > .config
+          echo "CONFIG_PACKAGE_luci-app-autoupdate=M" > .config
           make defconfig
           make package/luci-app-autoupdate/compile V=s
 
@@ -69,12 +69,12 @@ jobs:
       - name: Prepare Release Files
         run: |
           mkdir -p release
-          find packages -name "*.ipk" -exec cp {} release/ \;
+          find packages -name "*.apk" -exec cp {} release/ \;
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: release/*.ipk
+          files: release/*.apk
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: |
@@ -89,7 +89,7 @@ jobs:
             
             安装命令：
             ```bash
-            apk add --allow-trusted luci-app-autoupdate_*.ipk
+            apk add --allow-untrusted luci-app-autoupdate_*.apk
             ```
             
             ### 功能特性 / Features
