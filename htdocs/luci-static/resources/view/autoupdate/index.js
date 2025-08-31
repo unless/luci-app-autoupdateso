@@ -43,10 +43,15 @@ return view.extend({
 
         o = s.option(form.Value, 'url', _('固件下载地址'));
         o.rmempty = false;
-        
         // 保存按钮点击事件
         o.write = function(section_id, value) {
-            return callSetUrl({ type: 'url', content: value });
+            // 先调用RPC写入
+            return callSetUrl({ type: 'url', content: value }).then(function(res) {
+                // RPC成功后，重新加载UCI配置并刷新表单
+                return uci.load('autoupdate').then(function() {
+                    window.location.reload();
+                });
+            });
         };
 
         s = m.section(form.TypedSection, 'settings');
