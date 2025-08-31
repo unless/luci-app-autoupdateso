@@ -39,7 +39,8 @@ return view.extend({
         if (!document.getElementById('autoupdate-style')) {
             var style = document.createElement('style');
             style.id = 'autoupdate-style';
-            style.innerHTML = '.cbi-section .cbi-value { max-width:500px; margin-left:0 !important; }';
+            // 让表单项整体左移，与标题左对齐
+            style.innerHTML = '.cbi-section .cbi-value { max-width:500px; margin-left:-60px !important; }';
             document.head.appendChild(style);
         }
 
