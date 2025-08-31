@@ -24,7 +24,8 @@ jobs:
         run: |
           SDK_URL="https://downloads.openwrt.org/snapshots/targets/qualcommax/ipq807x/openwrt-sdk-qualcommax-ipq807x_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
           wget $SDK_URL
-          tar --zstd -xf openwrt-sdk-*.tar.zst
+          zstd -d openwrt-sdk-*.tar.zst
+          tar -xf openwrt-sdk-*.tar
           mv openwrt-sdk-* openwrt-sdk
 
       - name: Prepare Package Source
