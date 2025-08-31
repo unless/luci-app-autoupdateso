@@ -35,6 +35,14 @@ return view.extend({
     render: function() {
         var m, s, o;
 
+        // 添加样式让输入框左对齐（只插入一次）
+        if (!document.getElementById('autoupdate-style')) {
+            var style = document.createElement('style');
+            style.id = 'autoupdate-style';
+            style.innerHTML = '.cbi-section .cbi-value { max-width:500px; margin-left:0 !important; }';
+            document.head.appendChild(style);
+        }
+
         m = new form.Map('autoupdate', _('固件更新'),
             _('设置固件下载地址并执行更新操作'));
 
@@ -43,17 +51,6 @@ return view.extend({
 
         o = s.option(form.Value, 'url', _('固件下载地址'));
         o.rmempty = false;
-        // 让输入框和标题左对齐
-        o.render = function() {
-            // 只调整样式，不覆盖原有逻辑，防止返回 Promise
-            o.widget = function(section_id, value) {
-                var widget = form.Value.prototype.widget.apply(this, arguments);
-                var wrapper = E('div', {
-                    style: 'margin-left:-40px; max-width:500px; display:flex; align-items:center;'
-                }, [widget]);
-                return wrapper;
-            };
-        };
         // 保存按钮点击事件
         o.write = function(section_id, value) {
             // 先调用RPC写入
@@ -65,9 +62,10 @@ return view.extend({
             });
         };
 
-        s = m.section(form.TypedSection, 'settings');
-        s.anonymous = true;
-        s.render = function() {
+        // 按钮区
+        var btnSection = m.section(form.TypedSection, 'dummy');
+        btnSection.anonymous = true;
+        btnSection.render = function() {
             return E('div', { 'class': 'cbi-section' }, [
                 E('button', {
                     'class': 'btn cbi-button cbi-button-apply',
@@ -75,14 +73,12 @@ return view.extend({
                         ui.showModal(_('下载固件'), [
                             E('p', { 'class': 'spinning' }, _('正在下载固件，请稍候...'))
                         ]);
-                        
                         return callDownload().then(function(res) {
                             ui.hideModal();
                             if (res && res.result)
                                 ui.addNotification(null, E('p', _('固件下载成功!')), 'success');
                             else
-                                ui.addNotification(null, E('p', _('固件下载失败: ') + 
-                                    ((res && res.error) || '未知错误')), 'danger');
+                                ui.addNotification(null, E('p', _('固件下载失败: ') + ((res && res.error) || '未知错误')), 'danger');
                         }).catch(function(err) {
                             ui.hideModal();
                             ui.addNotification(null, [
@@ -99,15 +95,11 @@ return view.extend({
                     'click': ui.createHandlerFn(this, function() {
                         if (!confirm(_('确定立即升级并保留配置吗？')))
                             return;
-                            
                         ui.showModal(_('系统升级'), [
                             E('p', { 'class': 'spinning' }, _('正在执行升级，设备将会重启...'))
                         ]);
-                        
                         return callUpgrade().then(function() {
-                            // 不关闭模态框，因为系统会重启
                             setTimeout(function() {
-                                // 如果一分钟后还没有重启完成，提示用户手动刷新
                                 ui.addNotification(null, E('p', _('升级可能已完成，请手动刷新页面')), 'info');
                             }, 60000);
                         }).catch(function(err) {
