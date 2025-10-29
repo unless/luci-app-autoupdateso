@@ -23,7 +23,7 @@ jobs:
       - name: Download OpenWrt SDK (for IPK)
         run: |
           # 使用稳定版本的 SDK 而不是快照版，通常稳定版默认生成 ipk
-          SDK_URL="https://downloads.openwrt.org/releases/24.10.4/targets/qualcommax/ipq807x/openwrt-sdk-24.10.4-qualcommax-ipq807x_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+          SDK_URL="https://downloads.openwrt.org/releases/24.10.4/targets/qualcommax/ipq807x/openwrt-sdk-24.10.4-qualcommax-ipq807x_gcc-13.3.0_musl.Linux-x86_64.tar.zst"
           wget $SDK_URL
           tar -xf openwrt-sdk-*.tar.xz
           rm -rf openwrt-sdk-*.tar.xz
