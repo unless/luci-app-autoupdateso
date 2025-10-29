@@ -18,16 +18,15 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential libncurses5-dev zlib1g-dev \
-            gawk git gettext libssl-dev wget zstd
+            gawk git gettext libssl-dev wget
 
-      - name: Download OpenWrt SDK
+      - name: Download OpenWrt SDK (for IPK)
         run: |
-          SDK_URL="https://downloads.openwrt.org/snapshots/targets/qualcommax/ipq807x/openwrt-sdk-qualcommax-ipq807x_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
+          # 使用稳定版本的 SDK 而不是快照版，通常稳定版默认生成 ipk
+          SDK_URL="https://downloads.openwrt.org/releases/23.05.2/targets/qualcommax/ipq807x/openwrt-sdk-24.10.4-qualcommax-ipq807x_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
           wget $SDK_URL
-          zstd -d openwrt-sdk-*.tar.zst
-          tar -xf openwrt-sdk-*.tar
-          rm -rf openwrt-sdk-*.tar
-          rm -rf openwrt-sdk-*.tar.zst
+          tar -xf openwrt-sdk-*.tar.xz
+          rm -rf openwrt-sdk-*.tar.xz
           mv openwrt-sdk-* openwrt-sdk
 
       - name: Prepare Package Source
@@ -52,12 +51,20 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v1
         with:
-          files: openwrt-sdk/bin/packages/aarch64_cortex-a53/base/luci-app-autoupdate_*.apk
+          files: openwrt-sdk/bin/packages/aarch64_cortex-a53/base/luci-app-autoupdate_*.ipk
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: |
             ## LuCI App Auto Update - Release ${{ github.ref_name }}
             
+            ### 安装说明 / Installation
+            
+            下载 `.ipk` 文件，适用于 Qualcomm IPQ8071A 平台设备：
+            - 支持 Qualcommax IPQ807x 系列芯片 (如 IPQ8071A)
+            - ARM64 架构
+            - 基于 OpenWrt 23.05.2 稳定版构建
+            
+            安装命令：
             ### 安装说明 / Installation
             
             下载 `.apk` 文件，适用于 Qualcomm IPQ8071A 平台设备：
